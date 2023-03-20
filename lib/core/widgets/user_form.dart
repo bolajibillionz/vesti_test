@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
-
-import '../../data/users.dart';
+import '../../data/users_model.dart';
 import '../constants.dart';
 import '../size_config.dart';
 import 'build_button.dart';
 import 'build_button_with_generic_child.dart';
-import 'general_text.dart';
+import 'create_general_text.dart';
 
 class UserForm extends StatefulWidget {
-  final User? user;
+  final UserModel? user;
   final int length;
   final int formNumber;
-  final void Function(User user) onChanged;
-  final bool Function(String email)? emailValidator;
+  final void Function(UserModel user) onChanged;
 
   UserForm(
       {required this.user,
       required this.length,
       required this.formNumber,
-       this.emailValidator,
       required this.onChanged});
 
   @override
@@ -30,9 +27,8 @@ class _UserFormState extends State<UserForm> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
   late TextEditingController _addressController;
-  late TextEditingController _mainSkillController = TextEditingController();
-  final TextEditingController _skillController = TextEditingController();
-  late List<String> _skills;
+  late TextEditingController _mainSkillController;
+  late TextEditingController _skillController;
 
   @override
   void initState() {
@@ -44,7 +40,10 @@ class _UserFormState extends State<UserForm> {
       ..addListener(_onChange);
     _addressController = TextEditingController(text: widget.user?.address)
       ..addListener(_onChange);
-    _skills = List<String>.from(widget.user?.skills ?? []);
+    _mainSkillController = TextEditingController(text: widget.user?.skillOne)
+      ..addListener(_onChange);
+    _skillController = TextEditingController(text: widget.user?.skillTwo)
+      ..addListener(_onChange);
   }
 
   @override
@@ -52,35 +51,19 @@ class _UserFormState extends State<UserForm> {
     _nameController.dispose();
     _emailController.dispose();
     _addressController.dispose();
+    _mainSkillController.dispose();
+    _skillController.dispose();
     super.dispose();
   }
 
   void _onChange() {
-    var user = User(
-      name: _nameController.text,
-      email: _emailController.text,
-      address: _addressController.text,
-      skills: _skills,
-    );
+    var user = UserModel(
+        name: _nameController.text,
+        email: _emailController.text,
+        address: _addressController.text,
+        skillOne: _mainSkillController.text,
+        skillTwo: _skillController.text);
     widget.onChanged(user);
-  }
-
-  void _removeSkill() {
-    if (_skills.isNotEmpty) {
-      setState(() {
-        _skills.removeLast();
-        _onChange();
-      });
-    }
-  }
-
-  void _addSkill() {
-    if (_skillFormKey.currentState?.validate() ?? false) {
-      setState(() {
-        _skills.add(_skillController.text);
-        _onChange();
-      });
-    }
   }
 
   @override
@@ -136,10 +119,6 @@ class _UserFormState extends State<UserForm> {
             validator: (value) {
               if (value!.isEmpty) {
                 return 'Please enter your email';
-              } else if ( value.isEmpty
-                // widget.emailValidator(value)
-                ) {
-                return 'Email already exists';
               }
               return null;
             },
@@ -167,7 +146,7 @@ class _UserFormState extends State<UserForm> {
           buildInputfield(
             validator: (value) {
               if (value!.isEmpty) {
-                return 'Please enter your skill';
+                return 'Please enter a skill';
               }
               return null;
             },
@@ -196,10 +175,8 @@ class _UserFormState extends State<UserForm> {
                 SizedBox(
                   width: getProportionateScreenWidth(10),
                 ),
-                BuildButtonWithChild(
-                    onPressed: () {
-                      _addSkill();
-                    },
+                ButtonWithChild(
+                    onPressed: () {},
                     child: Center(
                       child: createGeneralText(
                           inputText: '+ Add skill',
@@ -215,10 +192,8 @@ class _UserFormState extends State<UserForm> {
                 SizedBox(
                   width: getProportionateScreenWidth(5),
                 ),
-                BuildButtonWithChild(
-                    onPressed: () {
-                      _removeSkill();
-                    },
+                ButtonWithChild(
+                    onPressed: () {},
                     child: Center(
                       child: createGeneralText(
                           inputText: '- Remove skill',
@@ -246,47 +221,8 @@ class _UserFormState extends State<UserForm> {
       required TextEditingController inputController,
       required String? Function(String?)? validator}) {
     return SizedBox(
-      // height: getProportionateScreenHeight(60),
       width: getProportionateScreenWidth(fieldWidth),
-      child:
-
-          //  InputDecorator(
-          //   decoration: InputDecoration(
-          //     enabled: true,
-          //     labelText: labelText,
-          //     labelStyle: labelTextStyle,
-          //     filled: true,
-          //     fillColor: Palette.textFieldColor,
-          //     focusedBorder: OutlineInputBorder(
-          //       borderRadius: BorderRadius.circular(5.0),
-          //       borderSide: BorderSide(
-          //         style: BorderStyle.solid,
-          //         width: 0.5,
-          //         color: Palette.labelTextColor,
-          //       ),
-          //     ),
-          //     enabledBorder: OutlineInputBorder(
-          //       gapPadding: 0,
-          //       borderRadius: BorderRadius.circular(5.0),
-          //       borderSide: BorderSide(
-          //         style: BorderStyle.solid,
-          //         width: 0.5,
-          //         color: Palette.labelTextColor,
-          //       ),
-          //     ),
-          //     border: OutlineInputBorder(
-          //       gapPadding: 0,
-          //       borderRadius: BorderRadius.circular(5.0),
-          //       borderSide: BorderSide(
-          //         style: BorderStyle.solid,
-          //         width: 0.5,
-          //         color: Palette.labelTextColor,
-          //       ),
-          //     ),
-          //   ),
-          //   child:
-
-          TextFormField(
+      child: TextFormField(
         controller: inputController,
         validator: validator,
         decoration: InputDecoration(

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:vesti_test/core/constants.dart';
-import 'package:vesti_test/core/reuseables/build_button.dart';
-import 'package:vesti_test/core/reuseables/build_button_with_generic_child.dart';
-import 'package:vesti_test/core/reuseables/general_text.dart';
-import 'package:vesti_test/core/reuseables/utils.dart';
+import 'package:vesti_test/core/widgets/build_button.dart';
+import 'package:vesti_test/core/widgets/build_button_with_generic_child.dart';
+import 'package:vesti_test/core/widgets/create_general_text.dart';
+import 'package:vesti_test/core/widgets/utils.dart';
 import 'package:vesti_test/core/size_config.dart';
-import '../core/reuseables/user_form.dart';
-import '../data/users.dart';
+import '../core/widgets/user_form.dart';
+import '../data/users_model.dart';
 
 class UserInfoScreen extends StatefulWidget {
   const UserInfoScreen({super.key});
@@ -17,23 +17,22 @@ class UserInfoScreen extends StatefulWidget {
 
 class _UserInfoScreenState extends State<UserInfoScreen> {
   final _regKey = GlobalKey<FormState>();
-  List<User> _users = [];
-  // User newUser = User(name: '', email: '', address: '', skills: []);
+  List<UserModel> _users = [];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _users.add(User.empty());
+    _users.add(UserModel.empty());
   }
 
-  void _addUser(User user) {
+  void _addUser(UserModel user) {
     setState(() {
       _users.add(user);
     });
   }
 
-  void _updateUser(int index, User user) {
+  void _updateUser(int index, UserModel user) {
     setState(() {
       _users[index] = user;
     });
@@ -59,88 +58,46 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                     user: _users[index],
                                     length: _users.length,
                                     formNumber: index + 1,
-                                    // emailValidator: _emailValidator,
                                     onChanged: (user) {
                                       _updateUser(index, user);
                                     }),
                                 SizedBox(
                                   height: getProportionateScreenHeight(35),
                                 ),
-                                buildRowOfButtons(newOnpressed: () {
+                                buildRowOfButtons(onRemovePressed: () {
+                                  setState(() {
+                                    _users.removeLast();
+                                  });
+                                }, onAddPressed: () {
                                   String email = _users[index].email;
+                                  //form validation
                                   final isvalid =
                                       _regKey.currentState!.validate();
                                   if (!isvalid) return;
-                                  final tempList = List<User>.from(_users)
+                                  //create temporary list without the last user object at current index
+                                  final tempList = List<UserModel>.from(_users)
                                     ..removeAt(index);
-
+                                  //extract a list of only emails from the user object
                                   List<String> emailList = tempList
                                       .map((object) => object.email)
                                       .toList();
-
+                                  //search the email list to determine if the email already exist in memory
                                   bool _contain = emailList.contains(email);
                                   if (_contain) {
-                                    warningSnackBar(
+                                    createWarningSnackBar(
                                         context: context,
                                         message: 'Email already exists');
-                                    print(_contain);
-                                    print('okokokok');
                                   } else {
                                     setState(() {
-                                      _users.add(User.empty());
+                                      _users.add(UserModel.empty());
                                     });
-                                    print('object is free');
                                   }
-                                  // print('calm down');
-
-                                  // print(_users[0].email);
-                                  // print(_users[1].email);
-                                  // print(_users[2].email);
-                                  // for (int i = 0; i < _users.length - 1; i++) {
-                                  //   String email = _users[index].email;
-                                  //   if (email == _users[i].email) {
-                                  //     print('this is working');
-                                  //   } else {
-                                  //     print('not working');
-
-                                  //   }
-                                  // }
-
-                                  // setState(() {
-                                  //   _users.add(User.empty());
-                                  // });
-                                  // if (_users.contains(_users[2].email)) {
-                                  //   print('this is here');
-                                  // }
-
-                                  // String email = _users[index].email;
-                                  // if (!_users.contains(email)) {
-
-                                  //   print('this is true');
-                                  // } else {
-                                  //   print('error');
-                                  // }
-
-                                  // String email = _users[index].email;
-                                  // print(email);
-
-                                  // for (int i = 0; i < _users.length - 1; i++) {
-                                  //   if (email == _users[i].email) {
-                                  //     print(_users[i].email);
-                                  //     warningSnackBar(
-                                  //         context: context,
-                                  //         message: 'Email already exist');
-                                  //   } else {
-
-                                  // }
-                                  // }
                                 }),
                               ],
                             )
                           : Column(
                               children: [
                                 UserForm(
-                                    // emailValidator: _emailValidator,
                                     user: _users[index],
                                     length: _users.length,
                                     formNumber: index + 1,
@@ -154,14 +111,13 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                   padding: EdgeInsets.symmetric(
                                       horizontal:
                                           getProportionateScreenWidth(40)),
-                                  child: BuildButton(
+                                  child: GeneralButton(
                                       onPressed: () async {
-                                        print(_users[0].email);
                                         final isValid =
                                             _regKey.currentState!.validate();
                                         if (!isValid) return;
                                         setState(() {
-                                          _users.add(User.empty());
+                                          _users.add(UserModel.empty());
                                         });
                                       },
                                       buttonText: 'Add Another User',
@@ -180,18 +136,11 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                     return Column(
                       children: [
                         UserForm(
-                            // emailValidator: null,
                             user: _users[index],
                             length: _users.length,
                             formNumber: index + 1,
                             onChanged: (user) {
-                              if (_users.contains(user.email)) {
-                                warningSnackBar(
-                                    context: context,
-                                    message: 'Email already Exist');
-                              } else {
-                                _updateUser(index, user);
-                              }
+                              _updateUser(index, user);
                             }),
                       ],
                     );
@@ -203,19 +152,18 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
     );
   }
 
-  Padding buildRowOfButtons({required void Function()? newOnpressed}) {
+  Padding buildRowOfButtons({
+    required void Function()? onAddPressed,
+    required void Function()? onRemovePressed,
+  }) {
     return Padding(
       padding:
           EdgeInsets.symmetric(horizontal: getProportionateScreenWidth(40)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          BuildButton(
-              onPressed: () {
-                setState(() {
-                  _users.removeLast();
-                });
-              },
+          GeneralButton(
+              onPressed: onRemovePressed,
               buttonText: 'Remove User',
               containerHeight: 60.0,
               containerWidth: 220.0,
@@ -225,8 +173,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
               buttonColor: Color(0xffffffff),
               borderColor: Palette.labelTextColor,
               buttonTextFamily: FontFamily.sohne),
-          BuildButton(
-              onPressed: newOnpressed,
+          GeneralButton(
+              onPressed: onAddPressed,
               buttonText: 'Add Another User',
               containerHeight: 60.0,
               containerWidth: 220.0,
@@ -240,21 +188,4 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
       ),
     );
   }
-
-  // bool _emailValidator(
-  //   String email,
-  // ) {
-  //   bool emailInUse = false;
-
-  //   for (int i = 0; i < _users.length - 1; i++) {
-  //     // if (_users[index] == _users[i]) continue;
-  //     if (email == _users[1].email) {
-  //       print('in use');
-  //       emailInUse = true;
-  //       break;
-  //     }
-  //   }
-
-  //   return emailInUse;
-  // }
 }

@@ -22,6 +22,8 @@ final hintTextStyle = TextStyle(
   fontWeight: FontWeight.w300,
   fontSize: getProportionateScreenWidth(16.0),
 );
+
+
 final labelTextStyle = TextStyle(
   color: Palette.labelTextColor,
   fontFamily: FontFamily.sohne,

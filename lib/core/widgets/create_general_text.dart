@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../size_config.dart';
 
 Text createGeneralText({
@@ -13,7 +12,6 @@ Text createGeneralText({
     style: TextStyle(
         fontSize: getProportionateScreenWidth(fontSize),
         fontFamily: family,
-        // fontWeight: weight,
         color: colorName),
   );
 }
